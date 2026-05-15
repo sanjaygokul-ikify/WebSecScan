@@ -1,27 +1,20 @@
 import argparse
-import requests
-from bs4 import BeautifulSoup
-import lxml
 
-    # Parse command-line arguments
+from src.scanner import Scanner
+
+
+def main():
     parser = argparse.ArgumentParser(description='WebSecScan')
-    parser.add_argument('--url', help='URL of web application to scan')
-    parser.add_argument('--output-file', help='file to write scan results to')
+    parser.add_argument('--url', required=True, help='URL of web application to scan')
+    parser.add_argument('--output-file', required=True, help='file to write scan results to')
     args = parser.parse_args()
 
-    # Send request to web application
-    response = requests.get(args.url)
+    vulnerabilities = Scanner(args.url).scan()
 
-    # Parse HTML response
-    soup = BeautifulSoup(response.content, 'lxml')
-
-    # Scan for vulnerabilities
-    vulnerabilities = []
-    for script in soup.find_all('script'):
-        if 'eval' in script.text:
-            vulnerabilities.append('Potential XSS vulnerability: ' + script.text)
-
-    # Write scan results to file
     with open(args.output_file, 'w') as f:
         for vulnerability in vulnerabilities:
             f.write(vulnerability + '\n')
+
+
+if __name__ == '__main__':
+    main()
